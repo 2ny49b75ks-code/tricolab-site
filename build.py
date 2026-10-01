@@ -1,285 +1,480 @@
 #!/usr/bin/env python3
-"""Génère le site Tricolab (FR + EN) : accueil, assistance, confidentialité.
-Lancer `python3 build.py` après toute modification du contenu ci-dessous."""
+"""Génère le site Tricolab (FR + EN) sur le modèle du site SITE DIM :
+fr/ et en/ (accueil, fonctionnalités, téléchargement, contact, confidentialité),
+assets/, sitemap.xml, robots.txt, redirection de langue à la racine.
+Les anciennes adresses (assistance.html, confidentialite.html, support-en.html,
+privacy-en.html, support.html, privacy.html, en.html) sont conservées : elles sont
+déjà inscrites dans App Store Connect.
+
+Le texte de l'assistance, de la confidentialité et de l'accueil vient de contenu.py.
+Lancer `python3 build.py` après toute modification, puis commit + push."""
+import json
+from datetime import date
 from pathlib import Path
 
+from contenu import EMAIL, EFFECTIVE, HOME, SUPPORT, PRIVACY
+
 ROOT = Path(__file__).parent
-EMAIL = "jdgeg@icloud.com"
-EFFECTIVE = {"fr": "1er octobre 2026", "en": "October 1, 2026"}
+# Adresse publique du site. À remplacer par l'adresse Netlify (https://tricolab.netlify.app)
+# le jour où le site y sera aussi publié, puis relancer ce script.
+SITE = "https://2ny49b75ks-code.github.io/tricolab-site"
+# Lien App Store : mettre l'URL réelle (https://apps.apple.com/ca/app/…/id…) à l'approbation.
+APPSTORE = None
+TODAY = date.today().isoformat()
 
-# Pages : (fichier FR, fichier EN)
-FILES = {"home": ("index.html", "en.html"), "support": ("assistance.html", "support-en.html"), "privacy": ("confidentialite.html", "privacy-en.html")}
-# Anciennes adresses françaises, conservées comme copies pour ne casser aucun lien déjà diffusé.
-LEGACY_FR = {"assistance.html": "support.html", "confidentialite.html": "privacy.html"}
-
-CSS = """
-:root{--pink:#E16487;--pink-deep:#BE4368;--pink-soft:#FAE0E7;--teal:#28958C;--teal-deep:#166B65;--teal-soft:#D7EFEC;
---cream:#EAE0C8;--paper:#FBF7F1;--ink:#3A2E2A;--ink-soft:#6f6460;--card:#ffffff}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55;
-background-image:repeating-linear-gradient(60deg,rgba(234,224,200,.45) 0 3px,transparent 3px 14px),repeating-linear-gradient(-60deg,rgba(234,224,200,.45) 0 3px,transparent 3px 14px)}
-a{color:var(--teal-deep)}
-.wrap{max-width:960px;margin:0 auto;padding:0 16px}
-header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pink-deep);font-weight:800;font-size:1.35rem}
-.brand img{width:44px;height:44px;border-radius:11px;object-fit:cover}
-nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-weight:600;font-size:.95rem}
-nav a{text-decoration:none}
-.lang{display:inline-flex;background:#fff;border:1px solid var(--cream);border-radius:999px;padding:2px}
-.lang a,.lang span{padding:3px 11px;border-radius:999px;font-weight:800;font-size:.8rem;text-decoration:none;color:var(--ink-soft)}
-.lang span{background:var(--teal);color:#fff}
-.hero{text-align:center;padding:28px 0 8px}
-.hero img.logo{width:190px;height:190px;border-radius:42px;object-fit:cover;box-shadow:0 14px 34px rgba(225,100,135,.35)}
-h1{font-size:clamp(2rem,6vw,3rem);margin:.5em 0 .1em;color:var(--pink-deep);font-weight:800;text-wrap:balance}
-.tagline{font-size:1.2rem;font-weight:700;color:var(--teal-deep);margin:0}
-.lead{max-width:640px;margin:14px auto 0;font-size:1.05rem;color:var(--ink-soft)}
-.soon{display:inline-block;margin-top:18px;background:var(--pink);color:#fff;font-weight:800;padding:12px 22px;border-radius:16px}
-h2{font-size:1.5rem;margin:1.8em 0 .6em;font-weight:800;text-wrap:balance}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
-.card{background:var(--card);border-radius:20px;padding:18px;box-shadow:0 4px 14px rgba(58,46,42,.07)}
-.card h3{margin:.1em 0 .3em;font-size:1.08rem}
-.card p{margin:0;color:var(--ink-soft);font-size:.97rem}
-.card .emoji{font-size:1.7rem}
-.shots{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 16px;scroll-snap-type:x mandatory}
-.shots img{height:440px;width:auto;border-radius:26px;box-shadow:0 6px 18px rgba(58,46,42,.16);scroll-snap-align:center;flex:none}
-article{background:var(--card);border-radius:22px;padding:22px;box-shadow:0 4px 14px rgba(58,46,42,.07);margin:18px 0}
-article h2{margin-top:1.2em;font-size:1.2rem}
-article h2:first-child{margin-top:0}
-.note{background:var(--teal-soft);border-radius:14px;padding:12px 14px;color:var(--teal-deep);font-weight:600}
-footer{margin:36px 0 28px;text-align:center;color:var(--ink-soft);font-size:.9rem}
-footer a{margin:0 8px}
-@media (max-width:520px){.shots img{height:360px}.hero img.logo{width:150px;height:150px;border-radius:34px}}
-"""
+FILES = {
+    "home": {"fr": "index.html", "en": "index.html"},
+    "features": {"fr": "fonctionnalites.html", "en": "features.html"},
+    "download": {"fr": "telechargement.html", "en": "download.html"},
+    "contact": {"fr": "contact.html", "en": "contact.html"},
+    "privacy": {"fr": "confidentialite.html", "en": "privacy.html"},
+}
+NAV_ORDER = ["home", "features", "download", "contact"]
+# (fichier racine, langue, page) : anciennes adresses déjà diffusées
+LEGACY = [
+    ("assistance.html", "fr", "contact"), ("support.html", "fr", "contact"), ("support-en.html", "en", "contact"),
+    ("confidentialite.html", "fr", "privacy"), ("privacy.html", "fr", "privacy"), ("privacy-en.html", "en", "privacy"),
+]
 
 T = {
     "fr": {
-        "nav": {"home": "Accueil", "support": "Assistance", "privacy": "Confidentialité"},
-        "footer": "© 2026 JDG inc., Québec. Tous droits réservés.",
+        "nav": {"home": "Accueil", "features": "Fonctionnalités", "download": "Téléchargement", "contact": "Contact", "privacy": "Confidentialité"},
+        "cta": "Télécharger", "soon": "Bientôt sur l'App Store", "store": "Télécharger sur l'App Store",
+        "footer": "© 2026 JDG inc. — Québec, Canada. Tricolab est une marque de JDG inc.",
+        "menu": "Menu", "locale": "fr_CA", "alt_locale": "en_CA",
     },
     "en": {
-        "nav": {"home": "Home", "support": "Support", "privacy": "Privacy"},
-        "footer": "© 2026 JDG inc., Québec. All rights reserved.",
+        "nav": {"home": "Home", "features": "Features", "download": "Download", "contact": "Contact", "privacy": "Privacy"},
+        "cta": "Download", "soon": "Coming soon to the App Store", "store": "Download on the App Store",
+        "footer": "© 2026 JDG inc. — Quebec, Canada. Tricolab is a trademark of JDG inc.",
+        "menu": "Menu", "locale": "en_CA", "alt_locale": "fr_CA",
     },
 }
 
+SHOT = {  # clé → fichier de capture
+    "home": "01-accueil", "counter": "02-compteur-patron", "grid": "03-grille-crop-circle", "pattern": "04-fiche-patron",
+    "gen": "05-generateur-motifs", "lab": "06-labo", "community": "07-communaute", "card": "08-carte-a-partager", "full": "09-tricolab-complet",
+}
 
-def page(lang, key, title, description, body):
+# ----------------------------------------------------------------- contenu propre aux nouvelles pages
+HOME2 = {
+    "fr": dict(
+        eyebrow="Tricot · crochet · scrapbook",
+        h_free="Gratuite, avec un achat unique facultatif",
+        free="Le compteur mains libres, le lecteur de patrons, 5 patrons de lancement, 3 motifs crop circle, le Labo, les défis et les cartes à partager sont inclus. L'achat unique « Tricolab Complet » (4,99 $ CA) débloque les 25 autres patrons et les 17 autres motifs. Pas d'abonnement.",
+        cta_h="Prêt à tricoter, crocheter, créer ?", cta_p="Tricolab arrive bientôt sur l'App Store, pour iPhone et iPad.",
+        more="Voir toutes les fonctionnalités",
+        meta=[("iOS 17+", "requis"), ("iPhone", "et iPad"), ("FR / EN", "bilingue"), ("0 $", "sans publicité")],
+        title="Tricolab — compteur de rangs, patrons et motifs pour le tricot et le crochet",
+    ),
+    "en": dict(
+        eyebrow="Knitting · crochet · scrapbook",
+        h_free="Free, with one optional purchase",
+        free="The hands-free counter, the pattern reader, 5 launch patterns, 3 crop circle motifs, the Lab, challenges and shareable cards are included. The one-time \"Tricolab Complete\" purchase (CA$4.99) unlocks the 25 other patterns and the 17 other motifs. No subscription.",
+        cta_h="Ready to knit, crochet, create?", cta_p="Tricolab is coming soon to the App Store, for iPhone and iPad.",
+        more="See all features",
+        meta=[("iOS 17+", "required"), ("iPhone", "and iPad"), ("FR / EN", "bilingual"), ("$0", "no ads")],
+        title="Tricolab — row counter, patterns and motifs for knitting and crochet",
+    ),
+}
+
+FEATURES = {
+    "fr": dict(
+        title="Fonctionnalités — Tricolab", desc="Compteur mains libres, patrons qui suivent ta ligne, 30 patrons originaux, générateur de motifs, Labo et cartes à partager : tout ce que fait Tricolab.",
+        h1="Tout ce que fait Tricolab", intro="Un seul labo pour compter, suivre un patron, créer des motifs et garder tes projets bien rangés.",
+        blocks=[
+            ("counter", "Un compteur de rangs mains libres",
+             "Pensé pour les mains occupées : tu n'as pas à lâcher tes aiguilles.",
+             ["Un très gros bouton +, accessible d'un pouce", "Dis « suivant » ou « retour » : le compteur avance tout seul", "L'écran reste allumé pendant que tu travailles", "Motif répété, objectif de rangs, annulation, temps passé"]),
+            ("pattern", "Un patron qui ne perd jamais ta place",
+             "Importe un PDF, photographie un patron papier ou colle son texte.",
+             ["La ligne en cours est surlignée, ta position est sauvegardée", "Les abréviations sont traduites en clair, en français comme en anglais", "30 patrons originaux en 5 styles : Classique, Moderne, Rustique, Émoticône et Crop circle", "Dessin de l'objet fini, schéma coté, et tailles qui recalculent les instructions"]),
+            ("gen", "Un générateur de motifs",
+             "20 motifs en grille — crop circle, pêche, construction, feuilles et plus.",
+             ["Choisis la taille, deux couleurs et la technique (tricot double face ou crochet tapisserie)", "Les instructions s'écrivent toutes seules, rang par rang", "Le compteur suit ton avancement directement sur la grille"]),
+            ("lab", "Le Labo",
+             "Tout pour apprendre et calculer, sans quitter l'app.",
+             ["Techniques pas à pas pour le tricot et le crochet", "Fibres, aiguilles, crochets et accessoires expliqués", "Exemples de schémas et dictionnaire d'abréviations", "Calculateurs : jauge, changement de taille, quantité de laine, tailles d'aiguilles"]),
+            ("card", "Partage et motivation",
+             "Montre ce que tu as créé, et garde le plaisir de continuer.",
+             ["Une carte de fin de projet prête pour tes réseaux", "Un défi par mois avec son mot-clic", "Des badges à débloquer et à partager", "Ton bilan annuel : rangs, heures, laine utilisée, projets terminés"]),
+            ("home", "Tes projets, bien rangés",
+             "Une fiche par création, sur iPhone comme sur iPad.",
+             ["Photos, patron, laine, notes et avancement au même endroit", "Inventaire de laine", "Tout reste sur ton appareil : aucun compte, aucune publicité, aucun traceur"]),
+        ],
+        h_cmp="Gratuit ou Tricolab Complet", cmp_cols=("", "Gratuit", "Complet"),
+        cmp_rows=[("Compteur mains libres", "✓", "✓"), ("Lecteur de patrons (PDF, photo, texte)", "✓", "✓"), ("Le Labo et ses calculateurs", "✓", "✓"),
+                  ("Défis du mois et cartes à partager", "✓", "✓"), ("Patrons originaux", "5", "30"), ("Motifs en grille", "3", "20")],
+        cmp_note="« Tricolab Complet » est un achat unique de 4,99 $ CA, sans abonnement.",
+    ),
+    "en": dict(
+        title="Features — Tricolab", desc="Hands-free counter, patterns that keep your place, 30 original patterns, motif generator, the Lab and shareable cards: everything Tricolab does.",
+        h1="Everything Tricolab does", intro="One lab to count, follow a pattern, create motifs and keep your projects organized.",
+        blocks=[
+            ("counter", "A hands-free row counter",
+             "Built for busy hands: you never have to put your needles down.",
+             ["One very big + button, right under your thumb", "Say \"next\" or \"back\": the counter moves by itself", "The screen stays on while you work", "Pattern repeats, row goal, undo, time spent"]),
+            ("pattern", "A pattern that never loses your place",
+             "Import a PDF, photograph a paper pattern or paste its text.",
+             ["Your current line is highlighted and your position is saved", "Abbreviations are explained in plain words, in English and French", "30 original patterns in 5 styles: Classic, Modern, Rustic, Emoticon and Crop circle", "A drawing of the finished item, a measured schematic, and sizes that recalculate the instructions"]),
+            ("gen", "A motif generator",
+             "20 chart motifs — crop circles, fishing, construction, leaves and more.",
+             ["Choose the size, two colours and the technique (double knitting or tapestry crochet)", "Row-by-row instructions are written automatically", "The counter follows your progress right on the chart"]),
+            ("lab", "The Lab",
+             "Everything to learn and calculate, without leaving the app.",
+             ["Step-by-step techniques for knitting and crochet", "Fibres, needles, hooks and notions explained", "Chart examples and an abbreviation dictionary", "Calculators: gauge, resizing, yarn quantity, needle sizes"]),
+            ("card", "Share and stay motivated",
+             "Show what you made, and keep the joy of going on.",
+             ["A finished-project card ready for your socials", "A monthly challenge with its hashtag", "Badges to unlock and share", "Your year in review: rows, hours, yarn used, projects finished"]),
+            ("home", "Your projects, organized",
+             "One page per creation, on iPhone and iPad alike.",
+             ["Photos, pattern, yarn, notes and progress in one place", "Yarn stash", "Everything stays on your device: no account, no ads, no trackers"]),
+        ],
+        h_cmp="Free or Tricolab Complete", cmp_cols=("", "Free", "Complete"),
+        cmp_rows=[("Hands-free counter", "✓", "✓"), ("Pattern reader (PDF, photo, text)", "✓", "✓"), ("The Lab and its calculators", "✓", "✓"),
+                  ("Monthly challenges and shareable cards", "✓", "✓"), ("Original patterns", "5", "30"), ("Chart motifs", "3", "20")],
+        cmp_note="\"Tricolab Complete\" is a one-time CA$4.99 purchase, with no subscription.",
+    ),
+}
+
+DOWNLOAD = {
+    "fr": dict(
+        title="Téléchargement — Tricolab", desc="Tricolab arrive bientôt sur l'App Store pour iPhone et iPad. Gratuite, avec un achat unique facultatif.",
+        h1="Télécharger Tricolab", intro="Tricolab est gratuite et arrive bientôt sur l'App Store, pour iPhone et iPad.",
+        status_h="Disponibilité", status="Bientôt sur l'App Store. Cette page sera mise à jour avec le lien de téléchargement dès l'approbation.",
+        faq_h="Avant de télécharger",
+        faq=[("Mon appareil est-il compatible ?", "Tricolab fonctionne sur iPhone et iPad avec iOS 17 ou plus récent."),
+             ("Combien ça coûte ?", "L'app est gratuite. L'achat unique facultatif « Tricolab Complet » (4,99 $ CA) débloque tous les patrons et motifs, sans abonnement."),
+             ("Faut-il un compte ?", "Non. Aucun compte, aucune publicité, aucun traceur : tes projets restent sur ton appareil."),
+             ("En quelles langues ?", "Entièrement en français et en anglais, avec un bouton FR / EN dans l'app. Chaque patron existe dans les deux langues."),
+             ("Et sur Android ?", "Pas pour l'instant : Tricolab est seulement sur iPhone et iPad."),
+             ("Comment obtenir de l'aide ?", f'Écris-nous à <a href="mailto:{EMAIL}">{EMAIL}</a> ou consulte la page <a href="contact.html">Contact</a>.')],
+    ),
+    "en": dict(
+        title="Download — Tricolab", desc="Tricolab is coming soon to the App Store for iPhone and iPad. Free, with one optional purchase.",
+        h1="Download Tricolab", intro="Tricolab is free and coming soon to the App Store, for iPhone and iPad.",
+        status_h="Availability", status="Coming soon to the App Store. This page will be updated with the download link as soon as the app is approved.",
+        faq_h="Before you download",
+        faq=[("Is my device compatible?", "Tricolab runs on iPhone and iPad with iOS 17 or later."),
+             ("How much does it cost?", "The app is free. The optional one-time \"Tricolab Complete\" purchase (CA$4.99) unlocks every pattern and motif, with no subscription."),
+             ("Do I need an account?", "No. No account, no ads, no trackers: your projects stay on your device."),
+             ("Which languages?", "Fully in English and French, with an FR / EN button in the app. Every pattern exists in both languages."),
+             ("What about Android?", "Not at the moment: Tricolab is for iPhone and iPad only."),
+             ("How do I get help?", f'Email us at <a href="mailto:{EMAIL}">{EMAIL}</a> or visit the <a href="contact.html">Contact</a> page.')],
+    ),
+}
+
+CONTACT_EXTRA = {
+    "fr": dict(title="Contact et assistance — Tricolab", desc="Aide, questions fréquentes et contact pour l'app Tricolab.", h1="Contact et assistance",
+               mail_h="Nous écrire", mail_p="Précise si possible ton modèle d'iPhone ou d'iPad et ta version d'iOS. Chaque message est lu.", biz="JDG inc. · Québec, Canada"),
+    "en": dict(title="Contact and support — Tricolab", desc="Help, frequently asked questions and contact for the Tricolab app.", h1="Contact and support",
+               mail_h="Write to us", mail_p="If you can, tell us your iPhone or iPad model and your iOS version. Every message is read.", biz="JDG inc. · Quebec, Canada"),
+}
+
+
+# ----------------------------------------------------------------- gabarit
+def esc(s):
+    return s.replace("&", "&amp;").replace('"', "&quot;")
+
+
+def page(lang, key, title, desc, body, depth=1, jsonld=None):
+    """depth=1 : fichier dans fr/ ou en/ ; depth=0 : ancienne adresse à la racine."""
+    t = T[lang]
     other = "en" if lang == "fr" else "fr"
-    idx = 0 if lang == "fr" else 1
-    oidx = 1 - idx
-    nav = "".join(f'<a href="{FILES[k][idx]}">{T[lang]["nav"][k]}</a>' for k in ("home", "support", "privacy"))
-    switch = (f'<span>FR</span><a href="{FILES[key][oidx]}" lang="en" hreflang="en">EN</a>' if lang == "fr"
-              else f'<a href="{FILES[key][oidx]}" lang="fr" hreflang="fr">FR</a><span>EN</span>')
-    foot = "".join(f'<a href="{FILES[k][idx]}">{T[lang]["nav"][k]}</a>' for k in ("home", "support", "privacy"))
-    return f"""<!doctype html>
+    up = "../" if depth else ""
+    own = "" if depth else f"{lang}/"          # préfixe vers les pages de la même langue
+    oth = f"../{other}/" if depth else f"{other}/"
+    nav = "".join(
+        f'<li><a href="{own}{FILES[k][lang]}"{" aria-current=\"page\"" if k == key else ""}>{t["nav"][k]}</a></li>' for k in NAV_ORDER)
+    foot = "".join(f'<li><a href="{own}{FILES[k][lang]}">{t["nav"][k]}</a></li>' for k in NAV_ORDER + ["privacy"])
+    sw_fr = f'<a href="{(oth if lang == "en" else "")}{FILES[key]["fr"]}" hreflang="fr" lang="fr"{" class=\"active\"" if lang == "fr" else ""}>FR</a>'
+    sw_en = f'<a href="{(oth if lang == "fr" else "")}{FILES[key]["en"]}" hreflang="en" lang="en"{" class=\"active\"" if lang == "en" else ""}>EN</a>'
+    if depth == 0:  # racine : les deux liens passent par le dossier de langue
+        sw_fr = f'<a href="fr/{FILES[key]["fr"]}" hreflang="fr" lang="fr"{" class=\"active\"" if lang == "fr" else ""}>FR</a>'
+        sw_en = f'<a href="en/{FILES[key]["en"]}" hreflang="en" lang="en"{" class=\"active\"" if lang == "en" else ""}>EN</a>'
+    canon = f"{SITE}/{lang}/{'' if key == 'home' else FILES[key][lang]}"
+    alt = {l: f"{SITE}/{l}/{'' if key == 'home' else FILES[key][l]}" for l in ("fr", "en")}
+    og = f"{SITE}/assets/img/og-image-{lang}.png"
+    ld = f'<script type="application/ld+json">\n{json.dumps(jsonld, ensure_ascii=False, indent=2)}\n</script>\n' if jsonld else ""
+    cta = (f'<a href="{own}{FILES["download"][lang]}" class="btn btn--primary btn--sm">{t["cta"]}</a>')
+    return f"""<!DOCTYPE html>
 <html lang="{lang}">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title}</title>
-<meta name="description" content="{description}">
-<link rel="alternate" hreflang="{other}" href="{FILES[key][oidx]}">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="icon" href="assets/apple-touch-icon.png">
-<meta property="og:title" content="{title}">
-<meta property="og:description" content="{description}">
-<meta property="og:image" content="assets/logo.jpg">
-<style>{CSS}</style>
+<title>{esc(title)}</title>
+<meta name="description" content="{esc(desc)}">
+<link rel="canonical" href="{canon}">
+<link rel="alternate" hreflang="fr" href="{alt['fr']}">
+<link rel="alternate" hreflang="en" href="{alt['en']}">
+<link rel="alternate" hreflang="x-default" href="{alt['fr']}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tricolab">
+<meta property="og:title" content="{esc(title)}">
+<meta property="og:description" content="{esc(desc)}">
+<meta property="og:url" content="{canon}">
+<meta property="og:image" content="{og}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="{t['locale']}">
+<meta property="og:locale:alternate" content="{t['alt_locale']}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{esc(title)}">
+<meta name="twitter:description" content="{esc(desc)}">
+<meta name="twitter:image" content="{og}">
+<meta name="theme-color" content="#FBF7F1">
+{ld}<link rel="icon" href="{up}assets/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="{up}assets/apple-touch-icon.png">
+<link rel="stylesheet" href="{up}assets/css/style.css">
 </head>
 <body>
-<div class="wrap">
-<header class="top">
-  <a class="brand" href="{FILES['home'][idx]}"><img src="assets/logo.jpg" alt="">Tricolab</a>
-  <nav>{nav}<span class="lang">{switch}</span></nav>
+
+<header class="site-header">
+  <div class="container site-header__row">
+    <a href="{own}index.html" class="brand"><img src="{up}assets/img/logo-mark.png" alt="" class="brand-mark" width="42" height="42">Tricolab</a>
+    <nav class="main-nav" id="main-nav" aria-label="{t['menu']}">
+      <ul class="main-nav__links">{nav}</ul>
+    </nav>
+    <div class="header-actions">
+      <div class="lang-switch">{sw_fr}{sw_en}</div>
+      {cta}
+      <button class="nav-toggle" aria-label="{t['menu']}" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span></button>
+    </div>
+  </div>
 </header>
+
+<main>
 {body}
-<footer><div>{foot}</div><p>{T[lang]['footer']}</p></footer>
-</div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__row">
+      <a href="{own}index.html" class="site-footer__brand"><img src="{up}assets/img/logo-mark.png" alt="" class="brand-mark" width="42" height="42">Tricolab</a>
+      <nav><ul>{foot}</ul></nav>
+    </div>
+    <div class="site-footer__meta">{t['footer']}</div>
+  </div>
+</footer>
+
+<script src="{up}assets/js/main.js"></script>
 </body>
 </html>
 """
 
 
-def cards(items):
-    return '<div class="grid">' + "".join(
-        f'<div class="card"><div class="emoji">{e}</div><h3>{h}</h3><p>{p}</p></div>' for e, h, p in items) + "</div>"
+def store_button(lang, small=False):
+    t = T[lang]
+    if APPSTORE:
+        return f'<a href="{APPSTORE}" class="btn btn--primary" target="_blank" rel="noopener">{t["store"]}</a>'
+    return f'<span class="btn btn--soon">{t["soon"]}</span>'
 
 
-def shots(lang, alts):
-    names = ["01-accueil", "02-compteur-patron", "03-grille-crop-circle", "04-fiche-patron", "05-generateur-motifs", "08-carte-a-partager"]
-    return '<div class="shots">' + "".join(
-        f'<img src="assets/{lang}-{n}.jpg" alt="{a}" loading="lazy">' for n, a in zip(names, alts)) + "</div>"
+def shot(lang, key, alt, depth=1, cls=""):
+    up = "../" if depth else ""
+    return f'<img src="{up}assets/{lang}-{SHOT[key]}.jpg" alt="{esc(alt)}" loading="lazy"{f" class=\"{cls}\"" if cls else ""}>'
 
 
-HOME = {
-    "fr": dict(
-        title="Tricolab — compteur de rangs, patrons et motifs pour le tricot et le crochet",
-        desc="Tricolab : compteur de rangs mains libres, patrons originaux qui suivent ta ligne et générateur de motifs crop circle. Pour iPhone et iPad.",
-        tagline="Le labo de tes créations",
-        lead="Un compteur de rangs pensé pour les mains occupées, des patrons qui ne perdent jamais ta place et des motifs que tu ne trouveras nulle part ailleurs. Tricot et crochet, en français et en anglais.",
-        soon="Bientôt sur l'App Store · iPhone et iPad",
-        h_features="Ce que fait Tricolab",
-        features=[
-            ("🧶", "Compteur mains libres", "Un très gros bouton +, l'écran qui reste allumé, et la voix : dis « suivant » ou « retour » sans lâcher tes aiguilles."),
-            ("📖", "Un patron qui suit ta ligne", "Importe un PDF, photographie un patron papier ou colle son texte. La ligne en cours est surlignée et les abréviations sont traduites en clair."),
-            ("🧢", "30 patrons originaux", "Cinq styles : Classique, Moderne, Rustique, Émoticône et Crop circle. Dessin de l'objet fini, schéma coté et tailles qui recalculent les instructions."),
-            ("🛸", "Générateur de motifs", "20 motifs en grille — crop circle, pêche, construction, feuilles — à ta taille et à tes couleurs, avec les rangs écrits automatiquement."),
-            ("🧪", "Le Labo", "Techniques pas à pas, matériel, exemples de schémas, dictionnaire d'abréviations et calculateurs de jauge, de taille et de laine."),
-            ("🎀", "Partage et motivation", "Une carte de fin de projet à partager, un défi par mois, des badges et ton bilan annuel."),
-        ],
-        h_shots="Aperçu",
-        alts=["Écran d'accueil avec le projet en cours", "Compteur de rangs et patron surligné", "Grille crop circle suivie par le compteur",
-              "Fiche d'un patron avec le dessin de l'objet fini", "Générateur de motifs", "Carte de fin de projet à partager"],
-        h_privacy="Tes données restent chez toi",
-        privacy='Aucun compte, aucune publicité, aucun traceur. Tes projets, photos et patrons restent sur ton appareil. <a href="confidentialite.html">Lire la politique de confidentialité</a>.',
-    ),
-    "en": dict(
-        title="Tricolab — row counter, patterns and motifs for knitting and crochet",
-        desc="Tricolab: hands-free row counter, original patterns that keep your place and a crop circle motif generator. For iPhone and iPad.",
-        tagline="The lab for your creations",
-        lead="A row counter built for busy hands, patterns that never lose your place and motifs you won't find anywhere else. Knitting and crochet, in English and French.",
-        soon="Coming soon to the App Store · iPhone and iPad",
-        h_features="What Tricolab does",
-        features=[
-            ("🧶", "Hands-free counter", "One very big + button, a screen that stays on, and your voice: say \"next\" or \"back\" without putting your needles down."),
-            ("📖", "A pattern that keeps your place", "Import a PDF, photograph a paper pattern or paste its text. Your current line is highlighted and abbreviations are explained in plain words."),
-            ("🧢", "30 original patterns", "Five styles: Classic, Modern, Rustic, Emoticon and Crop circle. A drawing of the finished item, a measured schematic and sizes that recalculate the instructions."),
-            ("🛸", "Motif generator", "20 chart motifs — crop circles, fishing, construction, leaves — in your size and colours, with the rows written out automatically."),
-            ("🧪", "The Lab", "Step-by-step techniques, materials, chart examples, an abbreviation dictionary and calculators for gauge, sizing and yarn."),
-            ("🎀", "Share and stay motivated", "A finished-project card to share, a monthly challenge, badges and your year in review."),
-        ],
-        h_shots="Preview",
-        alts=["Home screen with the current project", "Row counter with the highlighted pattern", "Crop circle chart followed by the counter",
-              "Pattern page with a drawing of the finished item", "Motif generator", "Finished-project card to share"],
-        h_privacy="Your data stays with you",
-        privacy='No account, no ads, no trackers. Your projects, photos and patterns stay on your device. <a href="privacy-en.html">Read the privacy policy</a>.',
-    ),
-}
+def jsonld(lang):
+    desc = HOME[lang]["desc"]
+    return {
+        "@context": "https://schema.org", "@type": "MobileApplication", "name": "Tricolab",
+        "operatingSystem": "iOS 17+", "applicationCategory": "LifestyleApplication",
+        "url": f"{SITE}/{lang}/", "description": desc, "inLanguage": ["fr", "en"],
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "CAD"},
+        "publisher": {"@type": "Organization", "name": "JDG inc.",
+                      "address": {"@type": "PostalAddress", "addressRegion": "Québec", "addressCountry": "CA"}},
+    }
 
-SUPPORT = {
-    "fr": dict(
-        title="Assistance — Tricolab", desc="Aide, questions fréquentes et contact pour l'app Tricolab.",
-        h1="Assistance",
-        intro=f'Une question, un bogue à signaler ou une idée de patron ? Écris-nous : chaque message est lu.',
-        contact=f'Courriel : <a href="mailto:{EMAIL}?subject=Tricolab">{EMAIL}</a><br>Précise si possible ton modèle d\'iPhone ou d\'iPad et ta version d\'iOS.',
-        h_faq="Questions fréquentes",
-        faq=[
-            ("Comment fonctionne le compteur mains libres ?", "Ouvre le Compteur, touche « Mains libres » et autorise le micro et la reconnaissance vocale. Dis ensuite « suivant » pour ajouter un rang ou « retour » pour en retirer un. La reconnaissance se fait sur ton appareil."),
-            ("La commande vocale ne réagit pas. Que faire ?", "Vérifie dans Réglages → Tricolab que le micro et la reconnaissance vocale sont autorisés, et dans Réglages → Général → Clavier que la dictée est activée. Parle clairement, un mot à la fois."),
-            ("Comment ajouter mon propre patron ?", "Dans la fiche d'un projet, touche « Ajouter un patron » : tu peux importer un PDF, photographier un patron papier ou coller son texte. Touche une ligne pour la suivre ; ta position est sauvegardée."),
-            ("Le texte numérisé contient des erreurs.", "La numérisation peut confondre certains caractères (1 et l, 0 et O). Tu peux relire et corriger le texte avant de l'enregistrer. Une photo bien éclairée, à plat et nette donne les meilleurs résultats."),
-            ("Comment choisir la taille d'un patron ?", "Pour les bonnets, tuques, mitaines, cache-cous et écharpes, la fiche du patron propose plusieurs tailles. Choisis la tienne : les nombres de mailles et les mesures se recalculent. Vérifie toujours ta jauge avec un échantillon."),
-            ("Comment utiliser une grille de motif ?", "Dans Labo → Générateur de motifs, choisis un motif, sa taille, deux couleurs et la technique. L'app crée un projet : la grille surligne le rang à faire et les instructions avancent avec ton compteur."),
-            ("Où sont enregistrées mes données ?", "Sur ton appareil seulement. Elles sont incluses dans la sauvegarde de ton iPhone ou iPad si tu l'as activée, ce qui permet de les retrouver en changeant d'appareil. Supprimer l'app efface ses données."),
-            ("Tricolab est-elle gratuite ?", "Oui. Le compteur mains libres, le lecteur de patrons, les 5 patrons de la collection de lancement, 3 motifs crop circle, le Labo, les défis et les cartes à partager sont gratuits. L'achat unique « Tricolab Complet » débloque les 25 autres patrons et les 17 autres motifs, sans abonnement."),
-            ("J'ai changé d'appareil. Comment retrouver mon achat ?", "Ouvre le Profil (en haut à droite) → Tricolab Complet → « Restaurer mes achats », avec le même identifiant Apple. Les demandes de remboursement se font auprès d'Apple."),
-            ("L'app est-elle offerte en anglais ?", "Oui. Les boutons FR / EN en haut de l'écran changent la langue à tout moment, et chaque patron existe dans les deux langues."),
-            ("L'app existe-t-elle sur Android ?", "Pas pour l'instant. Tricolab fonctionne sur iPhone et iPad (iOS 17 ou plus récent)."),
-        ],
-    ),
-    "en": dict(
-        title="Support — Tricolab", desc="Help, frequently asked questions and contact for the Tricolab app.",
-        h1="Support",
-        intro="A question, a bug to report or a pattern idea? Write to us: every message is read.",
-        contact=f'Email: <a href="mailto:{EMAIL}?subject=Tricolab">{EMAIL}</a><br>If you can, tell us your iPhone or iPad model and your iOS version.',
-        h_faq="Frequently asked questions",
-        faq=[
-            ("How does the hands-free counter work?", "Open the Counter, tap \"Hands-free\" and allow the microphone and speech recognition. Then say \"next\" to add a row or \"back\" to remove one. Recognition happens on your device."),
-            ("Voice control doesn't react. What should I do?", "Check in Settings → Tricolab that the microphone and speech recognition are allowed, and in Settings → General → Keyboard that Dictation is enabled. Speak clearly, one word at a time."),
-            ("How do I add my own pattern?", "On a project page, tap \"Add a pattern\": you can import a PDF, photograph a paper pattern or paste its text. Tap a line to follow it; your position is saved."),
-            ("The digitized text has mistakes.", "Digitizing can confuse some characters (1 and l, 0 and O). You can proofread and fix the text before saving. A sharp, well-lit, flat photo gives the best results."),
-            ("How do I choose a pattern size?", "For hats, mitts, cowls and scarves, the pattern page offers several sizes. Pick yours: stitch counts and measurements recalculate. Always check your gauge with a swatch."),
-            ("How do I use a motif chart?", "In Lab → Motif generator, choose a motif, its size, two colours and the technique. The app creates a project: the chart highlights the row to work and the instructions advance with your counter."),
-            ("Where is my data stored?", "On your device only. It is included in your iPhone or iPad backup if you have one enabled, so you can get it back when you change devices. Deleting the app erases its data."),
-            ("Is Tricolab free?", "Yes. The hands-free counter, the pattern reader, the 5 launch patterns, 3 crop circle motifs, the Lab, challenges and shareable cards are free. The one-time \"Tricolab Complete\" purchase unlocks the 25 other patterns and the 17 other motifs, with no subscription."),
-            ("I changed devices. How do I get my purchase back?", "Open Profile (top right) → Tricolab Complete → \"Restore purchases\", with the same Apple ID. Refund requests are handled by Apple."),
-            ("Is the app available in French?", "Yes. The FR / EN buttons at the top of the screen switch language at any time, and every pattern exists in both languages."),
-            ("Is there an Android version?", "Not at the moment. Tricolab runs on iPhone and iPad (iOS 17 or later)."),
-        ],
-    ),
-}
 
-PRIVACY = {
-    "fr": dict(
-        title="Politique de confidentialité — Tricolab", desc="Tricolab ne collecte aucune donnée personnelle : tout reste sur ton appareil.",
-        h1="Politique de confidentialité",
-        note="En bref : Tricolab ne collecte, ne transmet et ne vend aucune donnée personnelle. Tout ce que tu crées reste sur ton appareil.",
-        sections=[
-            ("Qui sommes-nous", f"Tricolab est une application éditée par JDG inc., au Québec (Canada). Pour toute question sur cette politique : <a href=\"mailto:{EMAIL}?subject=Tricolab%20-%20Confidentialit%C3%A9\">{EMAIL}</a>."),
-            ("Les données que nous collectons", "Aucune. L'app n'a pas de compte utilisateur, pas de serveur à nous, pas de publicité, pas d'outil de mesure d'audience ni de traceur, et n'intègre aucun service tiers."),
-            ("Ce qui est enregistré sur ton appareil", "Tes projets, photos, patrons importés ou numérisés, notes, matériel, inventaire de laine, compteurs, temps passé et réglages sont enregistrés uniquement dans l'espace de l'app, sur ton iPhone ou ton iPad. Nous n'y avons pas accès."),
-            ("Sauvegardes", "Si tu as activé la sauvegarde de ton appareil (iCloud ou ordinateur), les données de l'app en font partie. Ces sauvegardes sont gérées par Apple selon sa propre politique de confidentialité."),
-            ("Caméra", "La caméra sert uniquement à photographier tes créations et tes patrons papier, quand tu le demandes. Les photos restent sur ton appareil. La lecture du texte d'un patron (numérisation) se fait sur l'appareil."),
-            ("Micro et reconnaissance vocale", "Le micro n'est utilisé que lorsque tu actives le mode « Mains libres » du compteur, pour reconnaître des mots comme « suivant » et « retour ». La reconnaissance se fait sur ton appareil : le son n'est ni enregistré, ni conservé, ni envoyé à un serveur. L'écoute s'arrête dès que tu désactives le mode ou que tu quittes le compteur."),
-            ("Photos", "Pour ajouter une photo, l'app utilise le sélecteur de photos du système : elle ne reçoit que les images que tu choisis et n'a pas accès au reste de ta photothèque. Pour enregistrer une carte ou un badge, elle demande seulement la permission d'ajouter une image."),
-            ("Achats", "L'achat facultatif « Tricolab Complet » est traité par Apple avec ton identifiant Apple. Nous ne recevons ni ton nom, ni ton adresse courriel, ni tes informations de paiement. L'app vérifie seulement auprès de l'App Store si l'achat est actif."),
-            ("Partage", "Quand tu partages une carte, une grille ou un badge, c'est toi qui choisis l'app ou la personne destinataire. Ce contenu est alors soumis aux règles du service que tu as choisi."),
-            ("Enfants", "Tricolab convient à tous les âges et ne collecte aucune donnée, y compris auprès des enfants."),
-            ("Supprimer tes données", "Tu peux supprimer un projet à tout moment dans l'app. Supprimer l'app efface toutes ses données de l'appareil."),
-            ("Modifications", "Si cette politique change, la nouvelle version sera publiée sur cette page avec sa date d'entrée en vigueur."),
-        ],
-    ),
-    "en": dict(
-        title="Privacy Policy — Tricolab", desc="Tricolab collects no personal data: everything stays on your device.",
-        h1="Privacy Policy",
-        note="In short: Tricolab does not collect, transmit or sell any personal data. Everything you create stays on your device.",
-        sections=[
-            ("Who we are", f"Tricolab is an app published by JDG inc., in Québec (Canada). For any question about this policy: <a href=\"mailto:{EMAIL}?subject=Tricolab%20-%20Privacy\">{EMAIL}</a>."),
-            ("Data we collect", "None. The app has no user account, no server of ours, no advertising, no analytics and no trackers, and includes no third-party services."),
-            ("What is stored on your device", "Your projects, photos, imported or digitized patterns, notes, materials, yarn stash, counters, time spent and settings are stored only in the app's own space on your iPhone or iPad. We have no access to them."),
-            ("Backups", "If you have turned on device backups (iCloud or computer), the app's data is part of them. Those backups are handled by Apple under its own privacy policy."),
-            ("Camera", "The camera is used only to photograph your creations and paper patterns, when you ask for it. Photos stay on your device. Reading a pattern's text (digitizing) happens on the device."),
-            ("Microphone and speech recognition", "The microphone is used only when you turn on the counter's \"Hands-free\" mode, to recognize words such as \"next\" and \"back\". Recognition happens on your device: audio is not recorded, stored or sent to a server. Listening stops as soon as you turn the mode off or leave the counter."),
-            ("Photos", "To add a photo, the app uses the system photo picker: it receives only the images you choose and has no access to the rest of your library. To save a card or a badge, it asks only for permission to add an image."),
-            ("Purchases", "The optional \"Tricolab Complete\" purchase is processed by Apple with your Apple ID. We receive neither your name, nor your email address, nor your payment details. The app only checks with the App Store whether the purchase is active."),
-            ("Sharing", "When you share a card, a chart or a badge, you choose the app or person that receives it. That content is then subject to the rules of the service you chose."),
-            ("Children", "Tricolab is suitable for all ages and collects no data, including from children."),
-            ("Deleting your data", "You can delete a project at any time in the app. Deleting the app erases all of its data from the device."),
-            ("Changes", "If this policy changes, the new version will be published on this page with its effective date."),
-        ],
-    ),
-}
+# ----------------------------------------------------------------- pages
+def home(lang):
+    h, h2, t = HOME[lang], HOME2[lang], T[lang]
+    feats = "".join(f'<div class="card"><div class="emoji">{e}</div><h3>{a}</h3><p>{b}</p></div>' for e, a, b in h["features"])
+    shots = "".join(shot(lang, k, a) for k, a in zip(["home", "counter", "grid", "pattern", "gen", "lab", "community", "card"],
+                                                     h["alts"][:5] + [{"fr": "Le Labo : techniques, matériel et calculateurs", "en": "The Lab: techniques, materials and calculators"}[lang],
+                                                                      {"fr": "Communauté : défis du mois et badges", "en": "Community: monthly challenges and badges"}[lang], h["alts"][5]]))
+    meta = "".join(f"<span><strong>{a}</strong> {b}</span>" for a, b in h2["meta"])
+    body = f"""<section class="hero">
+  <div class="container hero__grid">
+    <div>
+      <p class="eyebrow">{h2['eyebrow']}</p>
+      <h1>{h['tagline']}</h1>
+      <p class="lead">{h['lead']}</p>
+      <div class="hero__actions">{store_button(lang)}<a href="{FILES['features'][lang]}" class="btn btn--outline">{h2['more']}</a></div>
+      <div class="hero__meta">{meta}</div>
+    </div>
+    <div class="hero__visual">
+      <img class="logo" src="../assets/img/logo-large.jpg" alt="Tricolab" width="330" height="330">
+      {shot(lang, 'counter', h['alts'][1], cls='phone')}
+    </div>
+  </div>
+</section>
+
+<div class="container"><hr class="stitch"></div>
+
+<section>
+  <div class="container">
+    <div class="section-head"><h2>{h['h_features']}</h2></div>
+    <div class="grid-3">{feats}</div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head"><h2>{h['h_shots']}</h2></div>
+    <div class="shots">{shots}</div>
+  </div>
+</section>
+
+<section>
+  <div class="container grid-2">
+    <div class="card"><div class="emoji">🎁</div><h3>{h2['h_free']}</h3><p>{h2['free']}</p></div>
+    <div class="card"><div class="emoji">🔒</div><h3>{h['h_privacy']}</h3><p>{h['privacy'].replace('privacy-en.html', FILES['privacy']['en']).replace('href="confidentialite.html"', 'href="' + FILES['privacy']['fr'] + '"')}</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="cta-band">
+      <h2>{h2['cta_h']}</h2>
+      <p>{h2['cta_p']}</p>
+      {store_button(lang)}
+    </div>
+  </div>
+</section>"""
+    return page(lang, "home", h2["title"], h["desc"], body, jsonld=jsonld(lang))
+
+
+def features(lang):
+    f = FEATURES[lang]
+    blocks = ""
+    for key, title, lead, bullets in f["blocks"]:
+        li = "".join(f"<li>{b}</li>" for b in bullets)
+        blocks += f"""<div class="feature">
+  <div class="feature__text"><h2>{title}</h2><p>{lead}</p><ul>{li}</ul></div>
+  <div class="feature__img">{shot(lang, key, title)}</div>
+</div>
+"""
+    c0, c1, c2 = f["cmp_cols"]
+    rows = "".join(f"<tr><td>{a}</td><td>{b}</td><td>{c}</td></tr>" for a, b, c in f["cmp_rows"])
+    body = f"""<div class="container page-head"><p class="eyebrow">Tricolab</p><h1>{f['h1']}</h1><p>{f['intro']}</p></div>
+<section><div class="container">
+{blocks}
+</div></section>
+<section><div class="container">
+  <div class="section-head"><h2>{f['h_cmp']}</h2></div>
+  <table class="compare"><thead><tr><th>{c0}</th><th>{c1}</th><th>{c2}</th></tr></thead><tbody>{rows}</tbody></table>
+  <p style="text-align:center;color:var(--ink-soft);margin-top:14px">{f['cmp_note']}</p>
+</div></section>
+<section><div class="container"><div class="cta-band"><h2>{HOME2[lang]['cta_h']}</h2><p>{HOME2[lang]['cta_p']}</p>{store_button(lang)}</div></div></section>"""
+    return page(lang, "features", f["title"], f["desc"], body)
+
+
+def download(lang):
+    d = DOWNLOAD[lang]
+    faq = "".join(f'<div class="card"><h3>{q}</h3><p>{a}</p></div>' for q, a in d["faq"])
+    body = f"""<div class="container page-head"><p class="eyebrow">Tricolab</p><h1>{d['h1']}</h1><p>{d['intro']}</p></div>
+<section><div class="container">
+  <div class="card" style="text-align:center;padding:34px 22px">
+    <img src="../assets/img/logo-mark.png" alt="" width="96" height="96" style="margin:0 auto 14px;border-radius:24px;box-shadow:0 10px 24px rgba(225,100,135,.35)">
+    <h3 style="font-size:1.3rem">{d['status_h']}</h3>
+    <p style="margin:8px auto 18px;max-width:520px">{d['status']}</p>
+    {store_button(lang)}
+  </div>
+</div></section>
+<section><div class="container">
+  <div class="section-head"><h2>{d['faq_h']}</h2></div>
+  <div class="grid-2">{faq}</div>
+</div></section>"""
+    return page(lang, "download", d["title"], d["desc"], body)
+
+
+def contact(lang, depth=1):
+    s, c = SUPPORT[lang], CONTACT_EXTRA[lang]
+    faq = "".join(f"<h2>{q}</h2><p>{a}</p>" for q, a in s["faq"])
+    body = f"""<div class="container page-head"><p class="eyebrow">Tricolab</p><h1>{c['h1']}</h1><p>{s['intro']}</p></div>
+<section><div class="container">
+  <article class="doc contact-card"><h2>{c['mail_h']}</h2>
+    <p class="mail"><a href="mailto:{EMAIL}?subject=Tricolab">{EMAIL}</a></p>
+    <p>{c['mail_p']}</p><p>{c['biz']}</p></article>
+  <div class="section-head" style="margin-top:34px"><h2>{s['h_faq']}</h2></div>
+  <article class="doc">{faq}</article>
+</div></section>"""
+    return page(lang, "contact", c["title"], c["desc"], body, depth=depth)
+
+
+def privacy(lang, depth=1):
+    p = PRIVACY[lang]
+    sections = "".join(f"<h2>{t}</h2><p>{c}</p>" for t, c in p["sections"])
+    label = "En vigueur le" if lang == "fr" else "Effective"
+    body = f"""<div class="container page-head"><p class="eyebrow">Tricolab</p><h1>{p['h1']}</h1><p>{label} {EFFECTIVE[lang]}</p></div>
+<section><div class="container">
+  <div class="callout">{p['note']}</div>
+  <article class="doc">{sections}</article>
+</div></section>"""
+    return page(lang, "privacy", p["title"], p["desc"], body, depth=depth)
+
+
+def redirect(dest, auto=True):
+    script = """<script>
+  (function () {
+    var lang = (navigator.language || "fr").toLowerCase();
+    window.location.replace(lang.indexOf("fr") === 0 ? "fr/index.html" : "en/index.html");
+  })();
+</script>
+""" if auto else ""
+    return f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0; url={dest}">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tricolab</title>
+<link rel="canonical" href="{SITE}/{dest}">
+{script}</head>
+<body><p><a href="fr/index.html">Français</a> — <a href="en/index.html">English</a></p></body>
+</html>
+"""
+
+
+def sitemap():
+    urls = []
+    for key in NAV_ORDER + ["privacy"]:
+        for lang in ("fr", "en"):
+            path = lambda l: f"{SITE}/{l}/{'' if key == 'home' else FILES[key][l]}"
+            prio = "1.0" if key == "home" else ("0.8" if key in ("features", "download") else "0.5")
+            freq = "weekly" if key == "home" else "monthly"
+            urls.append(f"""  <url>
+    <loc>{path(lang)}</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="{path('fr')}"/>
+    <xhtml:link rel="alternate" hreflang="en" href="{path('en')}"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="{path('fr')}"/>
+    <lastmod>{TODAY}</lastmod>
+    <changefreq>{freq}</changefreq>
+    <priority>{prio}</priority>
+  </url>""")
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
+            '        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n\n' + "\n\n".join(urls) + "\n</urlset>\n")
 
 
 def build():
     for lang in ("fr", "en"):
-        idx = 0 if lang == "fr" else 1
-        h = HOME[lang]
-        body = f"""<section class="hero">
-  <img class="logo" src="assets/logo.jpg" alt="Tricolab" width="190" height="190">
-  <h1>Tricolab</h1>
-  <p class="tagline">{h['tagline']}</p>
-  <p class="lead">{h['lead']}</p>
-  <div class="soon">{h['soon']}</div>
-</section>
-<h2>{h['h_features']}</h2>
-{cards(h['features'])}
-<h2>{h['h_shots']}</h2>
-{shots(lang, h['alts'])}
-<h2>{h['h_privacy']}</h2>
-<p class="note">{h['privacy']}</p>"""
-        (ROOT / FILES["home"][idx]).write_text(page(lang, "home", h["title"], h["desc"], body), encoding="utf-8")
-
-        s = SUPPORT[lang]
-        faq = "".join(f"<h2>{q}</h2><p>{a}</p>" for q, a in s["faq"])
-        body = f"""<h1>{s['h1']}</h1>
-<article><p>{s['intro']}</p><p class="note">{s['contact']}</p></article>
-<h2>{s['h_faq']}</h2>
-<article>{faq}</article>"""
-        (ROOT / FILES["support"][idx]).write_text(page(lang, "support", s["title"], s["desc"], body), encoding="utf-8")
-
-        p = PRIVACY[lang]
-        sections = "".join(f"<h2>{t}</h2><p>{c}</p>" for t, c in p["sections"])
-        label = "En vigueur le" if lang == "fr" else "Effective"
-        body = f"""<h1>{p['h1']}</h1>
-<p>{label} {EFFECTIVE[lang]}</p>
-<p class="note">{p['note']}</p>
-<article>{sections}</article>"""
-        (ROOT / FILES["privacy"][idx]).write_text(page(lang, "privacy", p["title"], p["desc"], body), encoding="utf-8")
-    for current, legacy in LEGACY_FR.items():
-        (ROOT / legacy).write_text((ROOT / current).read_text(encoding="utf-8"), encoding="utf-8")
-    print("Site généré :", ", ".join(f for pair in FILES.values() for f in pair))
+        d = ROOT / lang
+        d.mkdir(exist_ok=True)
+        (d / FILES["home"][lang]).write_text(home(lang), encoding="utf-8")
+        (d / FILES["features"][lang]).write_text(features(lang), encoding="utf-8")
+        (d / FILES["download"][lang]).write_text(download(lang), encoding="utf-8")
+        (d / FILES["contact"][lang]).write_text(contact(lang), encoding="utf-8")
+        (d / FILES["privacy"][lang]).write_text(privacy(lang), encoding="utf-8")
+    for name, lang, key in LEGACY:
+        html = contact(lang, depth=0) if key == "contact" else privacy(lang, depth=0)
+        (ROOT / name).write_text(html, encoding="utf-8")
+    (ROOT / "index.html").write_text(redirect("fr/index.html"), encoding="utf-8")
+    (ROOT / "en.html").write_text(redirect("en/index.html", auto=False).replace('lang="fr"', 'lang="en"', 1), encoding="utf-8")
+    (ROOT / "sitemap.xml").write_text(sitemap(), encoding="utf-8")
+    (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
+    print("Site généré (fr/, en/, anciennes adresses, sitemap, robots).")
 
 
 if __name__ == "__main__":
