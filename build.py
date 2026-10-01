@@ -185,7 +185,7 @@ def page(lang, key, title, desc, body, depth=1, jsonld=None):
     own = "" if depth else f"{lang}/"          # préfixe vers les pages de la même langue
     oth = f"../{other}/" if depth else f"{other}/"
     nav = "".join(
-        f'<li><a href="{own}{FILES[k][lang]}"{" aria-current=\"page\"" if k == key else ""}>{t["nav"][k]}</a></li>' for k in NAV_ORDER)
+        f'<li><a href="{own}{FILES[k][lang]}"{" aria-current=\"page\"" if k == key else ""}>{t["nav"][k]}</a></li>' for k in NAV_ORDER + ["privacy"])
     foot = "".join(f'<li><a href="{own}{FILES[k][lang]}">{t["nav"][k]}</a></li>' for k in NAV_ORDER + ["privacy"])
     sw_fr = f'<a href="{(oth if lang == "en" else "")}{FILES[key]["fr"]}" hreflang="fr" lang="fr"{" class=\"active\"" if lang == "fr" else ""}>FR</a>'
     sw_en = f'<a href="{(oth if lang == "fr" else "")}{FILES[key]["en"]}" hreflang="en" lang="en"{" class=\"active\"" if lang == "en" else ""}>EN</a>'
