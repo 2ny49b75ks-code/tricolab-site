@@ -15,9 +15,8 @@ from pathlib import Path
 from contenu import EMAIL, EFFECTIVE, HOME, SUPPORT, PRIVACY
 
 ROOT = Path(__file__).parent
-# Adresse publique du site. À remplacer par l'adresse Netlify (https://tricolab.netlify.app)
-# le jour où le site y sera aussi publié, puis relancer ce script.
-SITE = "https://2ny49b75ks-code.github.io/tricolab-site"
+# Adresse publique du site (Netlify, publié le 2026-10-01). GitHub Pages reste actif en parallèle.
+SITE = "https://tricolab.netlify.app"
 # Lien App Store : mettre l'URL réelle (https://apps.apple.com/ca/app/…/id…) à l'approbation.
 APPSTORE = None
 TODAY = date.today().isoformat()

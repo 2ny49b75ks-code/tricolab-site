@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://2ny49b75ks-code.github.io/tricolab-site/sitemap.xml
+Sitemap: https://tricolab.netlify.app/sitemap.xml
