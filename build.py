@@ -8,7 +8,9 @@ EMAIL = "jdgeg@icloud.com"
 EFFECTIVE = {"fr": "1er octobre 2026", "en": "October 1, 2026"}
 
 # Pages : (fichier FR, fichier EN)
-FILES = {"home": ("index.html", "en.html"), "support": ("support.html", "support-en.html"), "privacy": ("privacy.html", "privacy-en.html")}
+FILES = {"home": ("index.html", "en.html"), "support": ("assistance.html", "support-en.html"), "privacy": ("confidentialite.html", "privacy-en.html")}
+# Anciennes adresses françaises, conservées comme copies pour ne casser aucun lien déjà diffusé.
+LEGACY_FR = {"assistance.html": "support.html", "confidentialite.html": "privacy.html"}
 
 CSS = """
 :root{--pink:#E16487;--pink-deep:#BE4368;--pink-soft:#FAE0E7;--teal:#28958C;--teal-deep:#166B65;--teal-soft:#D7EFEC;
@@ -130,7 +132,7 @@ HOME = {
         alts=["Écran d'accueil avec le projet en cours", "Compteur de rangs et patron surligné", "Grille crop circle suivie par le compteur",
               "Fiche d'un patron avec le dessin de l'objet fini", "Générateur de motifs", "Carte de fin de projet à partager"],
         h_privacy="Tes données restent chez toi",
-        privacy='Aucun compte, aucune publicité, aucun traceur. Tes projets, photos et patrons restent sur ton appareil. <a href="privacy.html">Lire la politique de confidentialité</a>.',
+        privacy='Aucun compte, aucune publicité, aucun traceur. Tes projets, photos et patrons restent sur ton appareil. <a href="confidentialite.html">Lire la politique de confidentialité</a>.',
     ),
     "en": dict(
         title="Tricolab — row counter, patterns and motifs for knitting and crochet",
@@ -269,6 +271,8 @@ def build():
 <p class="note">{p['note']}</p>
 <article>{sections}</article>"""
         (ROOT / FILES["privacy"][idx]).write_text(page(lang, "privacy", p["title"], p["desc"], body), encoding="utf-8")
+    for current, legacy in LEGACY_FR.items():
+        (ROOT / legacy).write_text((ROOT / current).read_text(encoding="utf-8"), encoding="utf-8")
     print("Site généré :", ", ".join(f for pair in FILES.values() for f in pair))
 
 
