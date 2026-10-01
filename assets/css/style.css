@@ -143,6 +143,8 @@ article.doc p { margin: 0; color: var(--ink-soft); }
   .hero__visual .logo { width: min(300px, 80%); }
   .feature, .feature:nth-of-type(even) { grid-template-columns: 1fr; }
   .feature__img, .feature:nth-of-type(even) .feature__img { order: 2; max-width: 240px; margin: 0 auto; }
+}
+@media (max-width: 1020px) {
   .nav-toggle { display: block; }
   .main-nav { position: absolute; left: 0; right: 0; top: 100%; margin: 0; background: var(--paper); border-bottom: 1px solid var(--cream); display: none; }
   .main-nav.open { display: block; }
