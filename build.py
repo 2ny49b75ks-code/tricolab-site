@@ -305,8 +305,7 @@ def home(lang):
       <div class="hero__meta">{meta}</div>
     </div>
     <div class="hero__visual">
-      <img class="logo" src="../assets/img/logo-large.jpg" alt="Tricolab" width="330" height="330">
-      {shot(lang, 'counter', h['alts'][1], cls='phone')}
+      <img class="logo" src="../assets/img/logo-large.jpg" alt="Tricolab" width="420" height="420">
     </div>
   </div>
 </section>
