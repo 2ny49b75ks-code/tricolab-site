@@ -72,7 +72,7 @@ h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); color: var(--pink-deep); font-weig
 .hero__meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 22px; font-size: .9rem; color: var(--ink-soft); }
 .hero__meta strong { color: var(--ink); }
 .hero__visual { position: relative; display: grid; place-items: center; }
-.hero__visual .logo { width: min(430px, 92%); border-radius: 64px; box-shadow: 0 24px 56px rgba(225,100,135,.42); border: 6px solid #fff; }
+.hero__visual .logo { width: min(430px, 92%); height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 64px; box-shadow: 0 24px 56px rgba(225,100,135,.42); border: 6px solid #fff; }
 
 /* ---------- Sections ---------- */
 section { padding: 34px 0; }
