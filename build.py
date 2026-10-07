@@ -17,8 +17,9 @@ from contenu import EMAIL, EFFECTIVE, HOME, SUPPORT, PRIVACY
 ROOT = Path(__file__).parent
 # Adresse publique du site (Netlify, publié le 2026-10-01). GitHub Pages reste actif en parallèle.
 SITE = "https://tricolab.netlify.app"
-# Lien App Store : mettre l'URL réelle (https://apps.apple.com/ca/app/…/id…) à l'approbation.
-APPSTORE = None
+# Lien App Store (approuvée, ID 6817956569), une version par langue.
+APPSTORE_BASE = "https://apps.apple.com/ca/app/tricolab/id6817956569"
+APPSTORE = {"fr": APPSTORE_BASE + "?l=fr-CA", "en": APPSTORE_BASE + "?l=en-CA"}
 TODAY = date.today().isoformat()
 
 FILES = {
@@ -61,7 +62,7 @@ HOME2 = {
         eyebrow="Tricot · crochet · scrapbook",
         h_free="Gratuite, avec un achat unique facultatif",
         free="Le compteur mains libres, le lecteur de patrons, 5 patrons de lancement, 3 motifs crop circle, le Labo, les défis et les cartes à partager sont inclus. L'achat unique « Tricolab Complet » (4,99 $ CA) débloque les 25 autres patrons et les 17 autres motifs. Pas d'abonnement.",
-        cta_h="Prêt à tricoter, crocheter, créer ?", cta_p="Tricolab arrive bientôt sur l'App Store, pour iPhone et iPad.",
+        cta_h="Prêt à tricoter, crocheter, créer ?", cta_p="Tricolab est disponible sur l'App Store, pour iPhone et iPad. Gratuite, avec un achat unique facultatif.",
         more="Voir toutes les fonctionnalités",
         meta=[("iOS 17+", "requis"), ("iPhone", "et iPad"), ("FR / EN", "bilingue"), ("0 $", "sans publicité")],
         title="Tricolab — compteur de rangs, patrons et motifs pour le tricot et le crochet",
@@ -70,7 +71,7 @@ HOME2 = {
         eyebrow="Knitting · crochet · scrapbook",
         h_free="Free, with one optional purchase",
         free="The hands-free counter, the pattern reader, 5 launch patterns, 3 crop circle motifs, the Lab, challenges and shareable cards are included. The one-time \"Tricolab Complete\" purchase (CA$4.99) unlocks the 25 other patterns and the 17 other motifs. No subscription.",
-        cta_h="Ready to knit, crochet, create?", cta_p="Tricolab is coming soon to the App Store, for iPhone and iPad.",
+        cta_h="Ready to knit, crochet, create?", cta_p="Tricolab is available on the App Store, for iPhone and iPad. Free, with one optional purchase.",
         more="See all features",
         meta=[("iOS 17+", "required"), ("iPhone", "and iPad"), ("FR / EN", "bilingual"), ("$0", "no ads")],
         title="Tricolab — row counter, patterns and motifs for knitting and crochet",
@@ -138,9 +139,9 @@ FEATURES = {
 
 DOWNLOAD = {
     "fr": dict(
-        title="Téléchargement — Tricolab", desc="Tricolab arrive bientôt sur l'App Store pour iPhone et iPad. Gratuite, avec un achat unique facultatif.",
-        h1="Télécharger Tricolab", intro="Tricolab est gratuite et arrive bientôt sur l'App Store, pour iPhone et iPad.",
-        status_h="Disponibilité", status="Bientôt sur l'App Store. Cette page sera mise à jour avec le lien de téléchargement dès l'approbation.",
+        title="Téléchargement — Tricolab", desc="Télécharge Tricolab sur l'App Store pour iPhone et iPad. Gratuite, avec un achat unique facultatif.",
+        h1="Télécharger Tricolab", intro="Tricolab est gratuite et disponible sur l'App Store, pour iPhone et iPad.",
+        status_h="Disponibilité", status="Disponible maintenant sur l'App Store, pour iPhone et iPad (iOS 17 ou plus récent).",
         faq_h="Avant de télécharger",
         faq=[("Mon appareil est-il compatible ?", "Tricolab fonctionne sur iPhone et iPad avec iOS 17 ou plus récent."),
              ("Combien ça coûte ?", "L'app est gratuite. L'achat unique facultatif « Tricolab Complet » (4,99 $ CA) débloque tous les patrons et motifs, sans abonnement."),
@@ -150,9 +151,9 @@ DOWNLOAD = {
              ("Comment obtenir de l'aide ?", f'Écris-nous à <a href="mailto:{EMAIL}">{EMAIL}</a> ou consulte la page <a href="contact.html">Contact</a>.')],
     ),
     "en": dict(
-        title="Download — Tricolab", desc="Tricolab is coming soon to the App Store for iPhone and iPad. Free, with one optional purchase.",
-        h1="Download Tricolab", intro="Tricolab is free and coming soon to the App Store, for iPhone and iPad.",
-        status_h="Availability", status="Coming soon to the App Store. This page will be updated with the download link as soon as the app is approved.",
+        title="Download — Tricolab", desc="Download Tricolab on the App Store for iPhone and iPad. Free, with one optional purchase.",
+        h1="Download Tricolab", intro="Tricolab is free and available on the App Store, for iPhone and iPad.",
+        status_h="Availability", status="Available now on the App Store, for iPhone and iPad (iOS 17 or later).",
         faq_h="Before you download",
         faq=[("Is my device compatible?", "Tricolab runs on iPhone and iPad with iOS 17 or later."),
              ("How much does it cost?", "The app is free. The optional one-time \"Tricolab Complete\" purchase (CA$4.99) unlocks every pattern and motif, with no subscription."),
@@ -265,7 +266,7 @@ def page(lang, key, title, desc, body, depth=1, jsonld=None):
 def store_button(lang, small=False):
     t = T[lang]
     if APPSTORE:
-        return f'<a href="{APPSTORE}" class="btn btn--primary" target="_blank" rel="noopener">{t["store"]}</a>'
+        return f'<a href="{APPSTORE[lang]}" class="btn btn--primary" target="_blank" rel="noopener">{t["store"]}</a>'
     return f'<span class="btn btn--soon">{t["soon"]}</span>'
 
 
@@ -281,6 +282,7 @@ def jsonld(lang):
         "operatingSystem": "iOS 17+", "applicationCategory": "LifestyleApplication",
         "url": f"{SITE}/{lang}/", "description": desc, "inLanguage": ["fr", "en"],
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "CAD"},
+        "sameAs": [APPSTORE_BASE], "installUrl": APPSTORE[lang],
         "publisher": {"@type": "Organization", "name": "JDG inc.",
                       "address": {"@type": "PostalAddress", "addressRegion": "Québec", "addressCountry": "CA"}},
     }
