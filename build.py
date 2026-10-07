@@ -21,6 +21,8 @@ SITE = "https://tricolab.netlify.app"
 APPSTORE_BASE = "https://apps.apple.com/ca/app/tricolab/id6817956569"
 APPSTORE = {"fr": APPSTORE_BASE + "?l=fr-CA", "en": APPSTORE_BASE + "?l=en-CA"}
 TODAY = date.today().isoformat()
+# Liens vers les autres apps de JDG inc. (pied de page de l'accueil)
+JDG_APPS = {'fr': '<div class="jdg-apps" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(127,127,127,.3);font-size:.88em;line-height:1.8;text-align:center"><strong>Les autres apps de JDG inc., Québec :</strong> <a href="https://camordtu.netlify.app/">CaMordTu</a> <span style="opacity:.75">(guide de pêche au Québec)</span> · <a href="https://sitedim.netlify.app/fr/index.html">SITE DIM</a> <span style="opacity:.75">(relevé de chantier en réalité augmentée)</span> · <a href="https://appmycreation.com/">MY CREATION</a> <span style="opacity:.75">(vos œuvres en relief 3D et en réalité augmentée)</span> · <a href="https://apps.apple.com/ca/app/id6810440422?l=fr-CA">Acoustic Detector</a> <span style="opacity:.75">(mesure sonore et traitement acoustique)</span> · <a href="https://apps.apple.com/ca/app/id6811432420?l=fr-CA">Fort et Château</a> <span style="opacity:.75">(forts et châteaux du monde)</span></div>', 'en': '<div class="jdg-apps" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(127,127,127,.3);font-size:.88em;line-height:1.8;text-align:center"><strong>More apps by JDG inc., Quebec:</strong> <a href="https://camordtu.netlify.app/en.html">CaMordTu</a> <span style="opacity:.75">(Quebec fishing guide)</span> · <a href="https://sitedim.netlify.app/en/index.html">SITE DIM</a> <span style="opacity:.75">(AR construction measuring)</span> · <a href="https://appmycreation.com/index-en.html">MY CREATION</a> <span style="opacity:.75">(your artwork in 3D relief and AR)</span> · <a href="https://apps.apple.com/ca/app/id6810440422?l=en-CA">Acoustic Detector</a> <span style="opacity:.75">(sound measurement and acoustic treatment)</span> · <a href="https://apps.apple.com/ca/app/id6811432420?l=en-CA">Fort et Château</a> <span style="opacity:.75">(forts and castles of the world)</span></div>'}
 
 FILES = {
     "home": {"fr": "index.html", "en": "index.html"},
@@ -253,6 +255,7 @@ def page(lang, key, title, desc, body, depth=1, jsonld=None):
       <a href="{own}index.html" class="site-footer__brand"><img src="{up}assets/img/logo-mark.png" alt="" class="brand-mark" width="42" height="42">Tricolab</a>
       <nav><ul>{foot}</ul></nav>
     </div>
+    {JDG_APPS[lang] if key == "home" else ""}
     <div class="site-footer__meta">{t['footer']}</div>
   </div>
 </footer>
