@@ -287,7 +287,7 @@ def page(lang, key, title, desc, body, depth=1, jsonld=None):
       <a href="{own}index.html" class="site-footer__brand"><img src="{up}assets/img/logo-mark.png" alt="" class="brand-mark" width="42" height="42">Tricolab</a>
       <nav><ul>{foot}</ul></nav>
     </div>
-    {JDG_APPS[lang] if key == "home" else ""}
+    {JDG_APPS[lang]}
     <div class="site-footer__meta">{t['footer']}</div>
   </div>
 </footer>
