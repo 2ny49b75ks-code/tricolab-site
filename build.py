@@ -56,6 +56,7 @@ T = {
 SHOT = {  # clé → fichier de capture (jeu 1.1 + couverture magazine 1.2)
     "home": "01-accueil", "counter": "02-compteur-patron", "three": "03-vue-3d-avancement", "garments": "04-vetements", "pattern": "05-fiche-vetement",
     "grid": "06-grille-crop-circle", "gen": "07-generateur-chevalier", "lab": "08-labo", "card": "09-carte-a-partager", "full": "10-tricolab-complet", "magazine": "magazine",
+    "hockey": "hockey", "noel": "noel",
 }
 
 # ----------------------------------------------------------------- contenu propre aux nouvelles pages
@@ -63,15 +64,15 @@ HOME2 = {
     "fr": dict(
         eyebrow="Tricot · crochet · scrapbook",
         h_free="Gratuite, avec un achat unique facultatif",
-        free="Le compteur mains libres, le lecteur de patrons, 5 patrons de lancement, 3 motifs crop circle, l'aperçu 3D et en réalité augmentée, le Labo, les défis et les cartes à partager sont inclus. L'achat unique « Tricolab Complet » (4,99 $ CA) débloque les 31 autres patrons et les 27 autres motifs. Pas d'abonnement.",
+        free="Le compteur mains libres, le lecteur de patrons, 5 patrons de lancement, 3 motifs crop circle, l'aperçu 3D et en réalité augmentée, le Labo, les défis et les cartes à partager sont inclus. L'achat unique « Tricolab Complet » (4,99 $ CA) débloque les 38 autres patrons et les 27 autres motifs. Pas d'abonnement.",
         cta_h="Prêt à tricoter, crocheter, créer ?", cta_p="Tricolab est disponible sur l'App Store, pour iPhone et iPad. Gratuite, avec un achat unique facultatif.",
         more="Voir toutes les fonctionnalités",
-        news_badge="Nouveautés", news_h="Vêtements, 3D, réalité augmentée et magazine",
-        news=["Collection Vêtements, du S au 2XL : pull, gilet à capuchon, veston, gilet sans manches, jupe, housse d'appuie-tête et couvre-siège d'auto",
-              "Ta pièce en 3D et en réalité augmentée, à taille réelle, avec l'avancement en couleur",
-              "Choix des couleurs sur chaque patron, 4 palettes assorties et 10 nouveaux motifs (course et chevalier)",
-              "Exportation style magazine : transforme ton projet terminé en couverture de magazine à partager"],
-        news_status="Version 1.1 : en cours de vérification chez Apple · Exportation magazine : prévue dans la version 1.2.",
+        news_badge="Nouveautés", news_h="Magazine, hockey, Noël et ceinture fléchée",
+        news=["Le magazine de tes créations : ton projet terminé devient une couverture à enregistrer dans tes Photos, partager ou imprimer",
+              "Chandail de hockey du S au 2XL et bas assortis, sans logo, avec 32 combinaisons de couleurs",
+              "Collection Noël : 4 bas de Noël à tricoter ou crocheter (classique, sucre d'orge, flocons brodés, au crochet)",
+              "Ceinture fléchée en tricot facile, en 3 longueurs"],
+        news_status="Version 1.2 disponible sur l'App Store depuis le 15 octobre 2026.",
 
         meta=[("iOS 17+", "requis"), ("iPhone", "et iPad"), ("FR / EN", "bilingue"), ("0 $", "sans publicité")],
         title="Tricolab — compteur de rangs, patrons et motifs pour le tricot et le crochet",
@@ -79,15 +80,15 @@ HOME2 = {
     "en": dict(
         eyebrow="Knitting · crochet · scrapbook",
         h_free="Free, with one optional purchase",
-        free="The hands-free counter, the pattern reader, 5 launch patterns, 3 crop circle motifs, the 3D and augmented-reality preview, the Lab, challenges and shareable cards are included. The one-time \"Tricolab Complete\" purchase (CA$4.99) unlocks the 31 other patterns and the 27 other motifs. No subscription.",
+        free="The hands-free counter, the pattern reader, 5 launch patterns, 3 crop circle motifs, the 3D and augmented-reality preview, the Lab, challenges and shareable cards are included. The one-time \"Tricolab Complete\" purchase (CA$4.99) unlocks the 38 other patterns and the 27 other motifs. No subscription.",
         cta_h="Ready to knit, crochet, create?", cta_p="Tricolab is available on the App Store, for iPhone and iPad. Free, with one optional purchase.",
         more="See all features",
-        news_badge="What's new", news_h="Clothing, 3D, augmented reality and magazine",
-        news=["Clothing collection, S to 2XL: sweater, hooded cardigan, jacket, sleeveless vest, skirt, headrest cover and car seat pad",
-              "Your piece in 3D and augmented reality, at real size, with progress shown in colour",
-              "Colour choices on every pattern, 4 matching palettes and 10 new motifs (racing and knight)",
-              "Magazine-style export: turn a finished project into a magazine cover to share"],
-        news_status="Version 1.1: under review at Apple · Magazine export: planned for version 1.2.",
+        news_badge="What's new", news_h="Magazine, hockey, Christmas and arrow sash",
+        news=["The magazine of your creations: your finished project becomes a cover to save to your Photos, share or print",
+              "Hockey jersey from S to 2XL and matching socks, with no logo and 32 colour combinations",
+              "Christmas collection: 4 stockings to knit or crochet (classic, candy cane, embroidered snowflakes, crochet)",
+              "Easy knitted Québec arrow sash (ceinture fléchée), in 3 lengths"],
+        news_status="Version 1.2 available on the App Store since October 15, 2026.",
 
         meta=[("iOS 17+", "required"), ("iPhone", "and iPad"), ("FR / EN", "bilingual"), ("$0", "no ads")],
         title="Tricolab — row counter, patterns and motifs for knitting and crochet",
@@ -96,7 +97,7 @@ HOME2 = {
 
 FEATURES = {
     "fr": dict(
-        title="Fonctionnalités — Tricolab", desc="Compteur mains libres, patrons qui suivent ta ligne, 36 patrons originaux, vêtements, 3D et réalité augmentée, générateur de motifs, Labo, cartes à partager et exportation style magazine : tout ce que fait Tricolab.",
+        title="Fonctionnalités — Tricolab", desc="Compteur mains libres, patrons qui suivent ta ligne, 43 patrons originaux, vêtements, hockey, bas de Noël, 3D et réalité augmentée, générateur de motifs, Labo, cartes à partager et exportation style magazine : tout ce que fait Tricolab.",
         h1="Tout ce que fait Tricolab", intro="Un seul labo pour compter, suivre un patron, créer des motifs et garder tes projets bien rangés.",
         blocks=[
             ("counter", "Un compteur de rangs mains libres",
@@ -104,7 +105,7 @@ FEATURES = {
              ["Un très gros bouton +, accessible d'un pouce", "Dis « suivant » ou « retour » : le compteur avance tout seul", "L'écran reste allumé pendant que tu travailles", "Motif répété, objectif de rangs, annulation, temps passé"]),
             ("pattern", "Un patron qui ne perd jamais ta place",
              "Importe un PDF, photographie un patron papier ou colle son texte.",
-             ["La ligne en cours est surlignée, ta position est sauvegardée", "Les abréviations sont traduites en clair, en français comme en anglais", "36 patrons originaux en 6 styles : Classique, Moderne, Rustique, Émoticône, Crop circle et Vêtements", "Dessin de l'objet fini, schéma coté, et tailles qui recalculent les instructions"]),
+             ["La ligne en cours est surlignée, ta position est sauvegardée", "Les abréviations sont traduites en clair, en français comme en anglais", "43 patrons originaux en 7 styles : Classique, Moderne, Rustique, Émoticône, Crop circle, Vêtements et Noël", "Dessin de l'objet fini, schéma coté, et tailles qui recalculent les instructions"]),
             ("gen", "Un générateur de motifs",
              "30 motifs en grille — crop circle, pêche, construction, feuilles, course, chevalier et plus.",
              ["Choisis la taille, deux couleurs et la technique (tricot double face ou crochet tapisserie)", "Les instructions s'écrivent toutes seules, rang par rang", "Le compteur suit ton avancement directement sur la grille"]),
@@ -113,7 +114,13 @@ FEATURES = {
              ["Techniques pas à pas pour le tricot et le crochet", "Fibres, aiguilles, crochets et accessoires expliqués", "Exemples de schémas et dictionnaire d'abréviations", "Calculateurs : jauge, changement de taille, quantité de laine, tailles d'aiguilles"]),
             ("garments", "Des vêtements, du S au 2XL",
              "Une collection complète à tricoter, avec les instructions qui se recalculent à ta taille.",
-             ["Pull, gilet à capuchon, veston, gilet sans manches et jupe évasée", "Housse d'appuie-tête et couvre-siège d'auto", "Ajustement au corps en option : élastique ou cordon aux poignets et à la taille", "Choisis tes couleurs, ou pars d'une des 4 palettes assorties"]),
+             ["Pull, gilet à capuchon, veston, gilet sans manches et jupe évasée", "Ceinture fléchée, housse d'appuie-tête et couvre-siège d'auto", "Ajustement au corps en option : élastique ou cordon aux poignets et à la taille", "Choisis tes couleurs, ou pars d'une des 4 palettes assorties"]),
+            ("hockey", "Hockey : chandail et bas",
+             "Le chandail de hockey à tes couleurs, sans logo, et les bas assortis.",
+             ["Chandail du S au 2XL : large bande au milieu du corps et sur les manches, col rond lacé", "Bas de hockey assortis en 4 tailles, avec élastique ou cordon", "32 combinaisons de couleurs, ou tes propres couleurs", "Le dessin et la vue 3D prennent tes couleurs"]),
+            ("noel", "Bas de Noël",
+             "Quatre bas à accrocher, à tricoter ou à crocheter.",
+             ["Classique, sucre d'orge, flocons brodés et au crochet", "Choisis tes couleurs ou une palette de Noël", "Une boucle pour les accrocher au manteau de cheminée", "Le compteur suit tes rangs"]),
             ("three", "Ta pièce en 3D et en réalité augmentée",
              "Vois ton projet à taille réelle avant même de commencer, puis suis-le en 3D.",
              ["Pose-le sur ta table ou au mur, déplace-le et tourne-le du doigt", "Ta main passe devant la pièce", "Pendant le projet, les rangs faits sont en couleur et le reste en pâle", "La caméra de la réalité augmentée n'enregistre rien"]),
@@ -129,11 +136,11 @@ FEATURES = {
         ],
         h_cmp="Gratuit ou Tricolab Complet", cmp_cols=("", "Gratuit", "Complet"),
         cmp_rows=[("Compteur mains libres", "✓", "✓"), ("Lecteur de patrons (PDF, photo, texte)", "✓", "✓"), ("Le Labo et ses calculateurs", "✓", "✓"),
-                  ("Défis du mois et cartes à partager", "✓", "✓"), ("Aperçu 3D et réalité augmentée", "✓", "✓"), ("Patrons originaux", "5", "36"), ("Motifs en grille", "3", "30")],
+                  ("Défis du mois et cartes à partager", "✓", "✓"), ("Aperçu 3D et réalité augmentée", "✓", "✓"), ("Patrons originaux", "5", "43"), ("Motifs en grille", "3", "30")],
         cmp_note="« Tricolab Complet » est un achat unique de 4,99 $ CA, sans abonnement.",
     ),
     "en": dict(
-        title="Features — Tricolab", desc="Hands-free counter, patterns that keep your place, 36 original patterns, clothing, 3D and augmented reality, motif generator, the Lab, shareable cards and magazine-style export: everything Tricolab does.",
+        title="Features — Tricolab", desc="Hands-free counter, patterns that keep your place, 43 original patterns, clothing, hockey, Christmas stockings, 3D and augmented reality, motif generator, the Lab, shareable cards and magazine-style export: everything Tricolab does.",
         h1="Everything Tricolab does", intro="One lab to count, follow a pattern, create motifs and keep your projects organized.",
         blocks=[
             ("counter", "A hands-free row counter",
@@ -141,7 +148,7 @@ FEATURES = {
              ["One very big + button, right under your thumb", "Say \"next\" or \"back\": the counter moves by itself", "The screen stays on while you work", "Pattern repeats, row goal, undo, time spent"]),
             ("pattern", "A pattern that never loses your place",
              "Import a PDF, photograph a paper pattern or paste its text.",
-             ["Your current line is highlighted and your position is saved", "Abbreviations are explained in plain words, in English and French", "36 original patterns in 6 styles: Classic, Modern, Rustic, Emoticon, Crop circle and Clothing", "A drawing of the finished item, a measured schematic, and sizes that recalculate the instructions"]),
+             ["Your current line is highlighted and your position is saved", "Abbreviations are explained in plain words, in English and French", "43 original patterns in 7 styles: Classic, Modern, Rustic, Emoticon, Crop circle, Clothing and Christmas", "A drawing of the finished item, a measured schematic, and sizes that recalculate the instructions"]),
             ("gen", "A motif generator",
              "30 chart motifs — crop circles, fishing, construction, leaves, racing, knight and more.",
              ["Choose the size, two colours and the technique (double knitting or tapestry crochet)", "Row-by-row instructions are written automatically", "The counter follows your progress right on the chart"]),
@@ -150,7 +157,13 @@ FEATURES = {
              ["Step-by-step techniques for knitting and crochet", "Fibres, needles, hooks and notions explained", "Chart examples and an abbreviation dictionary", "Calculators: gauge, resizing, yarn quantity, needle sizes"]),
             ("garments", "Clothing, from S to 2XL",
              "A complete collection to knit, with instructions that recalculate to your size.",
-             ["Sweater, hooded cardigan, jacket, sleeveless vest and A-line skirt", "Headrest cover and car seat pad", "Optional body fit: elastic or drawstring at the cuffs and waist", "Pick your colours, or start from one of 4 matching palettes"]),
+             ["Sweater, hooded cardigan, jacket, sleeveless vest and A-line skirt", "Arrow sash, headrest cover and car seat pad", "Optional body fit: elastic or drawstring at the cuffs and waist", "Pick your colours, or start from one of 4 matching palettes"]),
+            ("hockey", "Hockey: jersey and socks",
+             "A hockey jersey in your colours, with no logo, and matching socks.",
+             ["Jersey from S to 2XL: wide band across the middle and on the sleeves, laced round collar", "Matching hockey socks in 4 sizes, with elastic or a drawstring", "32 colour combinations, or your own colours", "The drawing and the 3D view take your colours"]),
+            ("noel", "Christmas stockings",
+             "Four stockings to hang, to knit or to crochet.",
+             ["Classic, candy cane, embroidered snowflakes and crochet", "Pick your colours or a Christmas palette", "A loop to hang them on the mantel", "The counter follows your rows"]),
             ("three", "Your piece in 3D and augmented reality",
              "See your project at real size before you even start, then follow it in 3D.",
              ["Place it on your table or wall, move it and turn it with your finger", "Your hand passes in front of the piece", "While you knit, finished rows show in colour and the rest faded", "The augmented-reality camera records nothing"]),
@@ -166,7 +179,7 @@ FEATURES = {
         ],
         h_cmp="Free or Tricolab Complete", cmp_cols=("", "Free", "Complete"),
         cmp_rows=[("Hands-free counter", "✓", "✓"), ("Pattern reader (PDF, photo, text)", "✓", "✓"), ("The Lab and its calculators", "✓", "✓"),
-                  ("Monthly challenges and shareable cards", "✓", "✓"), ("3D and augmented-reality preview", "✓", "✓"), ("Original patterns", "5", "36"), ("Chart motifs", "3", "30")],
+                  ("Monthly challenges and shareable cards", "✓", "✓"), ("3D and augmented-reality preview", "✓", "✓"), ("Original patterns", "5", "43"), ("Chart motifs", "3", "30")],
         cmp_note="\"Tricolab Complete\" is a one-time CA$4.99 purchase, with no subscription.",
     ),
 }
@@ -328,12 +341,12 @@ def home(lang):
     h, h2, t = HOME[lang], HOME2[lang], T[lang]
     feats = "".join(f'<div class="card"><div class="emoji">{e}</div><h3>{a}</h3><p>{b}</p></div>' for e, a, b in h["features"])
     alts = {"fr": ["Accueil avec le projet en cours", "Compteur de rangs et patron surligné", "Vue 3D qui montre l'avancement du projet", "La collection Vêtements",
-                   "Fiche d'un vêtement avec choix de taille et de couleurs", "Grille crop circle suivie par le compteur", "Générateur de motifs Chevalier", "Le Labo : techniques, matériel et calculateurs",
+                   "Chandail de hockey à tes couleurs", "La collection Noël : 4 bas de Noël", "Générateur de motifs Chevalier", "Le Labo : techniques, matériel et calculateurs",
                    "Couverture de magazine de ton projet terminé", "Carte de fin de projet à partager"],
             "en": ["Home screen with the current project", "Row counter with the highlighted pattern", "3D view showing the project's progress", "The Clothing collection",
-                   "Garment page with size and colour choices", "Crop circle chart followed by the counter", "Knight motif generator", "The Lab: techniques, materials and calculators",
+                   "Hockey jersey in your colours", "The Christmas collection: 4 stockings", "Knight motif generator", "The Lab: techniques, materials and calculators",
                    "Magazine cover of your finished project", "Finished-project card to share"]}[lang]
-    shots = "".join(shot(lang, k, a) for k, a in zip(["home", "counter", "three", "garments", "pattern", "grid", "gen", "lab", "magazine", "card"], alts))
+    shots = "".join(shot(lang, k, a) for k, a in zip(["home", "counter", "three", "garments", "hockey", "noel", "gen", "lab", "magazine", "card"], alts))
     meta = "".join(f"<span><strong>{a}</strong> {b}</span>" for a, b in h2["meta"])
     body = f"""<section class="hero">
   <div class="container hero__grid">
